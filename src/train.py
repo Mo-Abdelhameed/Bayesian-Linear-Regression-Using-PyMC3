@@ -141,6 +141,8 @@ x = df.values
 y = target.values
 n_features = x.shape[1]
 
+print(x.shape)
+import numpy as np
 # Training the bayesian regressor
 if __name__ == '__main__':
 
@@ -149,13 +151,14 @@ if __name__ == '__main__':
         # Priors
         alpha = pm.Normal('alpha', mu=0, sigma=10)
         beta = pm.Normal('beta', mu=0, sigma=10, shape=n_features)
-        sigma = pm.HalfNormal('sigma', sigma=10)
+        sigma = pm.HalfNormal('sigma', sigma=1)
 
         # Likelihood
         mu = alpha + pm.math.dot(x_shared, beta)
         likelihood = pm.Normal('y', mu=mu, sigma=sigma, observed=y)
 
-        trace = pm.sample(2000)
+        trace = pm.sample(2000, step=pm.Slice())
     # Saving the model
     with model:
         dump({'model': model, 'trace': trace, 'x_shared': x_shared}, PREDICTOR_FILE_PATH)
+
