@@ -139,13 +139,12 @@ if numeric_features:
 
 x = df.values
 y = target.values
-
 n_features = x.shape[1]
 
+# Training the bayesian regressor
 if __name__ == '__main__':
 
     x_shared = theano.shared(x)
-
     with pm.Model() as model:
         # Priors
         alpha = pm.Normal('alpha', mu=0, sigma=10)
@@ -157,5 +156,6 @@ if __name__ == '__main__':
         likelihood = pm.Normal('y', mu=mu, sigma=sigma, observed=y)
 
         trace = pm.sample(2000)
+    # Saving the model
     with model:
         dump({'model': model, 'trace': trace, 'x_shared': x_shared}, PREDICTOR_FILE_PATH)

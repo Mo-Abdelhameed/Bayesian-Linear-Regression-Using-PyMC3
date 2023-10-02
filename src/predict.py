@@ -96,27 +96,23 @@ if os.path.exists(SCALER_FILE_PATH):
 
 x = df.values
 
+# Loading the model
 model = load(PREDICTOR_FILE_PATH)
-
 loaded_model = model['model']
 loaded_trace = model['trace']
 x_shared = model['x_shared']
-
 x_shared.set_value(x)
 
-
+# Making predictions
 with loaded_model:
     # Generate samples from the posterior predictive distribution
     posterior_predictive_test = pm.sample_posterior_predictive(loaded_trace, samples=2000, model=loaded_model)
 
 # 'posterior_predictive' is a dictionary. Extract the samples for the observed node (e.g., 'y' or whatever name you used)
 predictions_samples_test = posterior_predictive_test['y']
-
 mean_predictions_test = predictions_samples_test.mean(axis=0)
 
 
-# Compute point estimates and uncertainty estimates from the samples
-
+# Creating predictions dataframe
 prediction_df = pd.DataFrame({id_feature: ids, "prediction": mean_predictions_test})
-
 prediction_df.to_csv(PREDICTIONS_FILE)
