@@ -1,0 +1,5 @@
+scikit-learn==1.1.2
+pandas==1.5.0
+numpy==1.22.1
+feature-engine==1.6.1
+pymc3==3.11.5
