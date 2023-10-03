@@ -30,6 +30,7 @@ PREDICTOR_FILE_PATH = os.path.join(PREDICTOR_DIR_PATH, "predictor.joblib")
 IMPUTATION_FILE = os.path.join(MODEL_ARTIFACTS_PATH, 'imputation.joblib')
 LABEL_ENCODER_FILE = os.path.join(MODEL_ARTIFACTS_PATH, 'label_encoder.joblib')
 SCALER_FILE_PATH = os.path.join(MODEL_ARTIFACTS_PATH, 'scaler.joblib')
+TARGET_SCALER_FILE = os.path.join(MODEL_ARTIFACTS_PATH, 'target_scaler.joblib')
 if not os.path.exists(MODEL_ARTIFACTS_PATH):
     os.makedirs(MODEL_ARTIFACTS_PATH)
 if not os.path.exists(PREDICTOR_DIR_PATH):
@@ -137,8 +138,16 @@ if numeric_features:
     dump(scaler, SCALER_FILE_PATH)
 
 
+
 x = df.values
 y = target.values
+
+target_scaler = StandardScaler()
+y = target_scaler.fit_transform(y.reshape(-1, 1)).squeeze()
+
+dump(target_scaler, TARGET_SCALER_FILE)
+
+
 n_features = x.shape[1]
 
 # Training the bayesian regressor
@@ -155,7 +164,7 @@ if __name__ == '__main__':
         mu = alpha + pm.math.dot(x_shared, beta)
         likelihood = pm.Normal('y', mu=mu, sigma=sigma, observed=y)
 
-        trace = pm.sample(2000, step=pm.Slice())
+        trace = pm.sample(draws=1000, tune=500, step=pm.Slice())
     # Saving the model
     with model:
         dump({'model': model, 'trace': trace, 'x_shared': x_shared}, PREDICTOR_FILE_PATH)

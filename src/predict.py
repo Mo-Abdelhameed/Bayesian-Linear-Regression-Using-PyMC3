@@ -29,6 +29,7 @@ PREDICTIONS_DIR = os.path.join(OUTPUT_DIR, 'predictions')
 PREDICTIONS_FILE = os.path.join(PREDICTIONS_DIR, 'predictions.csv')
 LABEL_ENCODER_FILE = os.path.join(MODEL_ARTIFACTS_PATH, 'label_encoder.joblib')
 SCALER_FILE_PATH = os.path.join(MODEL_ARTIFACTS_PATH, 'scaler.joblib')
+TARGET_SCALER_FILE = os.path.join(MODEL_ARTIFACTS_PATH, 'target_scaler.joblib')
 
 if not os.path.exists(PREDICTIONS_DIR):
     os.makedirs(PREDICTIONS_DIR)
@@ -92,6 +93,7 @@ if os.path.exists(SCALER_FILE_PATH):
     scaler = load(SCALER_FILE_PATH)
     df[numeric_features] = scaler.transform(df[numeric_features])
 
+target_scaler = load(TARGET_SCALER_FILE)
 x = df.values
 
 # Loading the model
@@ -104,13 +106,14 @@ x_shared.set_value(x)
 # Making predictions
 with loaded_model:
     # Generate samples from the posterior predictive distribution
-    posterior_predictive_test = pm.sample_posterior_predictive(loaded_trace, samples=2000, model=loaded_model)
+    posterior_predictive_test = pm.sample_posterior_predictive(loaded_trace, samples=1000, model=loaded_model)
 
 # 'posterior_predictive' is a dictionary. Extract the samples for the observed node (e.g., 'y' or whatever name you used)
 predictions_samples_test = posterior_predictive_test['y']
 mean_predictions_test = predictions_samples_test.mean(axis=0)
 
+predictions = target_scaler.inverse_transform(mean_predictions_test.reshape(-1, 1)).squeeze()
 
 # Creating predictions dataframe
-prediction_df = pd.DataFrame({id_feature: ids, "prediction": mean_predictions_test})
+prediction_df = pd.DataFrame({id_feature: ids, "prediction": predictions})
 prediction_df.to_csv(PREDICTIONS_FILE)
