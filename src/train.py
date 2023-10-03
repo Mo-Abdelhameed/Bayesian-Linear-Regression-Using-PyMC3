@@ -141,8 +141,6 @@ x = df.values
 y = target.values
 n_features = x.shape[1]
 
-print(x.shape)
-import numpy as np
 # Training the bayesian regressor
 if __name__ == '__main__':
 

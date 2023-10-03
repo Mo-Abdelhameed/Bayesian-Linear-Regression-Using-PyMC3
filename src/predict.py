@@ -5,8 +5,6 @@ import pandas as pd
 import json
 import warnings
 import pymc3 as pm
-import theano
-import numpy as np
 from joblib import load
 warnings.filterwarnings('ignore')
 
